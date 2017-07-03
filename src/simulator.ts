@@ -54,16 +54,24 @@ export class Simulator {
                         newSpaceIndex = index + dieValue;
 
                         // account for any desert tiles on the destination space
+                        let landedOnNegativeTile = false;
                         if (gameState.board[newSpaceIndex].desertTile) {
-                            newSpaceIndex += gameState.board[newSpaceIndex].desertTile.value;
+                            const desertTileValue = gameState.board[newSpaceIndex].desertTile.value;
+                            landedOnNegativeTile = desertTileValue === -1;
+                            newSpaceIndex += desertTileValue;
                         }
 
                         // remove the camels from their current space
                         const movedCamels = space.camels.splice(matchingCamelIndex);
 
                         // put the camels on their new space
-                        gameState.board[newSpaceIndex].camels =
-                            gameState.board[newSpaceIndex].camels.concat(movedCamels);
+                        if (landedOnNegativeTile) {
+                            gameState.board[newSpaceIndex].camels =
+                                movedCamels.concat(gameState.board[newSpaceIndex].camels);
+                        } else {
+                            gameState.board[newSpaceIndex].camels =
+                                gameState.board[newSpaceIndex].camels.concat(movedCamels);
+                        }
 
                     } else {
                         newSpaceIndex = index;
