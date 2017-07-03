@@ -1,0 +1,28 @@
+{
+  "name": "camel-up-calculator",
+  "version": "1.0.0",
+  "description": "A simple Node.js program that predicts Camel Up board positions",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nfriend/camel-up-calculator.git"
+  },
+  "author": "Nathan Friend",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nfriend/camel-up-calculator/issues"
+  },
+  "homepage": "https://github.com/nfriend/camel-up-calculator#readme",
+  "dependencies": {
+    "@types/chalk": "^0.4.31",
+    "@types/lodash": "^4.14.67",
+    "@types/q": "^1.0.1",
+    "chalk": "^2.0.1",
+    "lodash": "^4.17.4",
+    "q": "^1.5.0"
+  }
+}
