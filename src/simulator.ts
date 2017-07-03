@@ -29,44 +29,69 @@ export class Simulator {
 
         // shuffle the unrolled dice and move the corresponding camel
         _.shuffle(gameState.unrolledDice).forEach(camelColor => {
+
+            // roll the die
             let dieValue = Math.floor(Math.random() * 3) + 1;
 
+            // for each space, try and find the camel that matches 
+            // the color of the currently rolled die
             let camelHasBeenFound = false;
             gameState.board.forEach((space, index) => {
+
+                // if we've previously found and moved the
+                // matching camel, exit this loop early
                 if (camelHasBeenFound) return;
 
-                const matchingCamel = space.camels.filter(camel => camel === camelColor)[0];
-                if (!_.isUndefined(matchingCamel)) {
+                const matchingCamelIndex = space.camels.indexOf(camelColor);
+                if (matchingCamelIndex !== -1) {
+                    const matchingCamel = space.camels[matchingCamelIndex];
                     let newSpaceIndex: number;
 
                     if (!isGameOver) {
+                        // only continue to move pieces if the game is not over
+
+                        // calculate the index of the camel's new space
                         newSpaceIndex = index + dieValue;
-                        _.remove(space.camels, camel => camel === camelColor);
-                        gameState.board[newSpaceIndex].camels.push(matchingCamel);
+
+                        // account for any desert tiles on the destination space
+                        if (gameState.board[newSpaceIndex].desertTile) {
+                            newSpaceIndex += gameState.board[newSpaceIndex].desertTile.value;
+                        }
+
+                        // remove the camels from their current space
+                        const movedCamels = space.camels.splice(matchingCamelIndex);
+
+                        // put the camels on their new space
+                        gameState.board[newSpaceIndex].camels =
+                            gameState.board[newSpaceIndex].camels.concat(movedCamels);
+
                     } else {
                         newSpaceIndex = index;
                     }
 
+                    // if this camel has crossed the finish
+                    // line, flag the game as over
                     if (newSpaceIndex > 15) {
                         isGameOver = true;
                     }
 
-                    roundResult.camelPositions.push({
-                        camel: matchingCamel,
-                        spaceNumber: newSpaceIndex
-                    });
                     camelHasBeenFound = true;
                 }
             });
         });
 
-        // sort the results by the current camel position
-        roundResult.camelPositions.sort((a, b) => {
-            return b.spaceNumber - a.spaceNumber;
+        _.forEachRight(gameState.board, (space, index) => {
+            _.forEachRight(space.camels, camel => {
+                roundResult.camelPositions.push({
+                    camel: camel,
+                    spaceNumber: index
+                });
+            });
         });
 
         roundResults.push(roundResult);
 
+        // call this function recursively until the game is over
         if (isGameOver) {
             return roundResults;
         } else {
@@ -125,9 +150,6 @@ export class Simulator {
     }
 
     private logOutput = (output: ISimulatorOutput): void => {
-        // console.log(JSON.stringify(output, (key, value) => {
-        //     return key === 'camel' ? CamelColor[value] : value;
-        // }, 4));
 
         const camelToChalk = {};
         camelToChalk[CamelColor.Blue] = chalk.blue;
@@ -153,5 +175,11 @@ export class Simulator {
         console.log('');
         console.log(chalk.gray('-----------------------------------------------'));
         console.log('');
+    }
+
+    private stringifyRoundResults = (roundResult) => {
+        return JSON.stringify(roundResult, (key, value) => {
+            return key === 'camel' ? CamelColor[value] : value;
+        }, 4);
     }
 }
